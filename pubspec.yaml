@@ -1,45 +1,79 @@
+# ==============================================================================
+# SIAS Mobile - Configuração de Dependências e Metadados do Projeto
+# ==============================================================================
+# Este arquivo (pubspec.yaml) contém as especificações técnicas para o app
+# Flutter do SIAS. Define a versão, SDK, pacotes externos e ativos.
+#
+# Para mais detalhes sobre a especificação do projeto, veja os documentos
+# de arquitetura na raiz do repositório.
+
 name: sias_mobile
 description: "SIAS Mobile — acompanhamento de fila e agendamento para o cidadão."
+
+# Impede a publicação acidental no pub.dev.
 publish_to: 'none'
+
+# A versão do aplicativo segue o Versionamento Semântico (semver.org).
+# O número após o '+' é o build number (usado pela Play Store/App Store).
 version: 0.1.0+1
 
 environment:
+  # Versão mínima do Dart SDK necessária para as funcionalidades modernas do projeto.
   sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
+
+  # Ícones padrão do estilo iOS para o Flutter.
   cupertino_icons: ^1.0.8
 
-  # Gerenciamento de estado
+  # provider: Framework para gerenciamento de estado e injeção de dependência.
+  # Utilizado para gerenciar AuthProvider, BookingProvider e QueueProvider.
   provider: ^6.1.2
 
-  # Rede / HTTP (consumo da API Flask em app/routes/api.py)
+  # http: Cliente HTTP multiplataforma.
+  # Responsável por toda a comunicação com a API Flask do backend.
   http: ^1.2.2
 
-  # Persistência local segura (cookie de sessão, dados sensíveis)
+  # flutter_secure_storage: Armazenamento local criptografado.
+  # Essencial para manter o cookie de sessão e dados sensíveis (§2.2).
   flutter_secure_storage: ^9.2.2
 
-  # Persistência local simples (preferências não sensíveis)
+  # shared_preferences: Armazenamento simples de preferências do usuário.
+  # Usado para dados não sensíveis, como temas ou configurações de interface.
   shared_preferences: ^2.3.2
 
-  # QR Code do agendamento (Check-in Expresso na triagem)
+  # qr_flutter: Gerador de QR Code para visualização de agendamentos.
+  # Facilita o Check-in Expresso na triagem presencial.
   qr_flutter: ^4.1.0
 
-  # Biometria para retorno rápido (ver §2.2 da especificação) — expansão futura
+  # local_auth: Permite autenticação biométrica (Fingerprint/Face ID).
+  # Planejado para expansão futura de segurança no acesso rápido (§2.2).
   local_auth: ^2.3.0
 
-  # Formatação de datas/horas em pt-BR
+  # intl: Suporte para internacionalização e localização.
+  # Configurado especificamente para formatação de datas e moedas em pt-BR.
   intl: ^0.19.0
 
 dev_dependencies:
+  # Framework para execução de testes unitários e testes de widget.
   flutter_test:
     sdk: flutter
+
+  # Regras de linting para garantir a qualidade e consistência do código.
   flutter_lints: ^4.0.0
 
 flutter:
+  # Habilita o uso de componentes visuais baseados no Material Design 3.
   uses-material-design: true
 
+  # Ativos do projeto (imagens, fontes, etc) devem ser declarados aqui.
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/
+
+# Sobrescritas para resolver conflitos de versão entre pacotes.
 dependency_overrides:
   path_provider: ^2.1.5
   path_provider_android: ^2.2.15
