@@ -14,13 +14,19 @@ Este é um **esqueleto completo e navegável**, com dados de exemplo
 poucos. Todas as telas principais existem e navegam entre si:
 
 - **Auth**: Login → 2FA → (Cadastro)
+- **Home**: tela inicial pós-login, com atalhos para "Agendar consulta" e
+  "Histórico de agendamentos", além de um resumo dos agendamentos de hoje
 - **Booking**: Departamento → Carrinho de Serviços → Calendário/Horários
-- **Tracker**: Dashboard → Fila em tempo real → QR Code de check-in
+- **History**: lista completa de agendamentos do cliente (passados,
+  futuros e cancelados), com opção de cancelar
+- **Tracker**: Dashboard (agendamentos de hoje) → Fila em tempo real →
+  QR Code de check-in
 
-Por padrão, `lib/utils/constants.dart` tem `AppConfig.useMockData = true`,
-então o app roda e navega **sem precisar do backend rodando**, com dados
-fictícios (`Maria da Silva`, departamentos/serviços de exemplo, um
-agendamento "em atendimento" e outro "aguardando").
+`lib/utils/constants.dart` já está configurado para conversar com o
+backend real (`AppConfig.useMockData = false`, `apiBaseUrl` apontando
+para `localhost:5200`/`10.0.2.2:5200`, conforme o SIAS web em
+`C:\projeto-uab`). Para navegar com dados fictícios sem o backend
+rodando, mude `AppConfig.useMockData` para `true`.
 
 ## Como ligar a integração real com o backend
 
@@ -54,12 +60,14 @@ agendamento "em atendimento" e outro "aguardando").
    | GET    | `/api/cliente/meus-agendamentos`                    | Lista de agendamentos |
    | GET    | `/api/cliente/meus-agendamentos/status`             | Status em tempo real (polling) |
 
-3. Em `lib/utils/constants.dart`:
-   - Ajuste `AppConfig.apiBaseUrl`:
-     - Emulador Android → `http://10.0.2.2:5000/api` (já é o padrão)
-     - iOS Simulator / dispositivo físico → IP da máquina rodando o Flask
-       na mesma rede, ex.: `http://192.168.0.10:5000/api`
-   - Mude `AppConfig.useMockData` para `false`.
+3. Em `lib/utils/constants.dart`, ajuste `AppConfig.apiBaseUrl` conforme o
+   dispositivo/emulador usado (o SIAS web escuta na porta 5200, não 5000):
+   - Emulador Android → `http://10.0.2.2:5200/api` (já é o padrão)
+   - iOS Simulator → `http://localhost:5200/api`
+   - Dispositivo físico na mesma rede Wi-Fi → IP da máquina rodando o
+     Flask, ex.: `http://192.168.0.10:5200/api` (lembre de liberar esse
+     host em `android/app/src/main/res/xml/network_security_config.xml`
+     também)
 
 4. Rode:
    ```
@@ -75,6 +83,9 @@ agendamento "em atendimento" e outro "aguardando").
   cookie `HttpOnly` + 2FA.
 - **HTTPS**: em produção, sirva a API sob HTTPS e configure Certificate
   Pinning (§6 da especificação) — o `ApiClient` atual não faz pinning.
+  Em desenvolvimento, o HTTP puro para `10.0.2.2`/`localhost` é liberado
+  via `network_security_config.xml` (Android); restrinja isso antes de
+  ir para produção.
 - **QR Code**: hoje o QR contém apenas o `agendamento_id` em texto puro
   (ver TODO em `lib/screens/tracker/qr_code_screen.dart`). Antes de ir
   para produção, prefira um payload assinado/temporário gerado pelo
@@ -96,9 +107,11 @@ lib/
 ├── models/        # DTOs a partir do JSON da API
 ├── screens/
 │   ├── auth/      # LoginScreen, TwoFactorScreen, RegisterScreen
+│   ├── home/      # HomeScreen (hub pós-login)
 │   ├── booking/   # DepartmentScreen, ServiceCartScreen, CalendarScreen
+│   ├── history/   # HistoryScreen (histórico de agendamentos)
 │   └── tracker/   # DashboardScreen, LiveQueueScreen, QrCodeScreen
 ├── services/      # ApiClient, AuthService, BookingService
-├── providers/     # AuthProvider, BookingProvider, QueueProvider
+├── providers/     # AuthProvider, BookingProvider, QueueProvider, HistoryProvider
 └── utils/         # constants (config/AppConfig), theme, formatters
 ```

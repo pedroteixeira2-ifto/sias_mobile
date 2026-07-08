@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../tracker/dashboard_screen.dart';
+import '../home/home_screen.dart';
 
 class TwoFactorScreen extends StatefulWidget {
   const TwoFactorScreen({super.key});
@@ -24,7 +24,7 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
     final ok = await auth.verificarCodigo(_tokenController.text.trim());
     if (ok && mounted) {
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
         (route) => false,
       );
     } else if (mounted && auth.erro != null) {

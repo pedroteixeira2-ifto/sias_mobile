@@ -56,6 +56,8 @@ class CalendarScreen extends StatelessWidget {
                 final dia = proximosDias[i];
                 final selecionado = dia.day == provider.dataSelecionada.day &&
                     dia.month == provider.dataSelecionada.month;
+                final dataIso = Formatters.dataIso(dia);
+                final temVaga = (provider.contagemPorDia[dataIso] ?? 0) > 0;
                 return GestureDetector(
                   onTap: () => context.read<BookingProvider>().selecionarData(dia),
                   child: Container(
@@ -77,6 +79,17 @@ class CalendarScreen extends StatelessWidget {
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: selecionado ? Colors.white : Colors.black87)),
+                        const SizedBox(height: 4),
+                        Container(
+                          width: 5,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: temVaga
+                                ? (selecionado ? Colors.white : Theme.of(context).colorScheme.primary)
+                                : Colors.transparent,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -89,7 +102,17 @@ class CalendarScreen extends StatelessWidget {
             child: provider.carregando
                 ? const Center(child: CircularProgressIndicator())
                 : provider.horarios.isEmpty
-                    ? const Center(child: Text('Nenhum horário disponível nesta data.'))
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            provider.contagemPorDia.values.every((v) => v == 0)
+                                ? 'Nenhum horário disponível nos próximos 7 dias para os serviços selecionados.'
+                                : 'Nenhum horário disponível nesta data. Toque em outro dia acima.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),
                         itemCount: provider.horarios.length,

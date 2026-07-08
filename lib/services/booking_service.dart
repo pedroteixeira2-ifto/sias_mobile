@@ -1,3 +1,4 @@
+import '../models/agendamento_historico.dart';
 import '../models/agendamento_status.dart';
 import '../models/departamento.dart';
 import '../models/horario_disponivel.dart';
@@ -51,10 +52,13 @@ class BookingService {
     await _client.post('/agendamento/$agendamentoId/cancelar');
   }
 
-  Future<List<Map<String, dynamic>>> meusAgendamentos() async {
+  /// Histórico completo do cliente (passados, futuros e cancelados) —
+  /// consumido pela HistoryScreen.
+  Future<List<AgendamentoHistorico>> meusAgendamentos() async {
     final resp = await _client.get('/cliente/meus-agendamentos');
     return (resp['agendamentos'] as List<dynamic>)
-        .cast<Map<String, dynamic>>();
+        .map((e) => AgendamentoHistorico.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// Consumido pelo QueueProvider em polling — ver §4.2 da especificação.

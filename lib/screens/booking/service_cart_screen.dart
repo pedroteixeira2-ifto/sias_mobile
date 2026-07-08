@@ -65,7 +65,7 @@ class ServiceCartScreen extends StatelessWidget {
                       onPressed: provider.carrinho.isEmpty
                           ? null
                           : () {
-                              context.read<BookingProvider>().carregarDisponibilidade();
+                              context.read<BookingProvider>().carregarSemana();
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                     builder: (_) => const CalendarScreen()),

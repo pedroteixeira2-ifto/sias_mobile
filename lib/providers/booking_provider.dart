@@ -21,6 +21,11 @@ class BookingProvider extends ChangeNotifier {
   DateTime dataSelecionada = DateTime.now();
   List<HorarioDisponivel> horarios = [];
 
+  /// Quantidade de horários disponíveis por dia (chave = data ISO
+  /// "AAAA-MM-DD"), usada para destacar no seletor de dias quais datas
+  /// realmente têm disponibilidade — ver carregarSemana().
+  Map<String, int> contagemPorDia = {};
+
   bool carregando = false;
   String? erro;
   int? ultimoAgendamentoId;
@@ -86,12 +91,69 @@ class BookingProvider extends ChangeNotifier {
               servicoIds: carrinho.map((s) => s.id).toList(),
               data: Formatters.dataIso(dataSelecionada),
             );
+      contagemPorDia[Formatters.dataIso(dataSelecionada)] = horarios.length;
     } catch (e) {
       erro = _mensagemDeErro(e);
     } finally {
       carregando = false;
       notifyListeners();
     }
+  }
+
+  /// Consulta a disponibilidade dos próximos 7 dias (mesma janela exibida
+  /// pelo seletor de dias da CalendarScreen) e já seleciona automaticamente
+  /// o primeiro dia que tiver algum horário livre, em vez de deixar o
+  /// usuário parado em "hoje" quando hoje não tem disponibilidade
+  /// cadastrada. Preenche [contagemPorDia] para destacar no seletor quais
+  /// dias têm vaga.
+  Future<void> carregarSemana() async {
+    carregando = true;
+    erro = null;
+    contagemPorDia = {};
+    notifyListeners();
+
+    if (AppConfig.useMockData) {
+      dataSelecionada = DateTime.now();
+      horarios = _mockHorarios;
+      contagemPorDia[Formatters.dataIso(dataSelecionada)] = horarios.length;
+      carregando = false;
+      notifyListeners();
+      return;
+    }
+
+    final hoje = DateTime.now();
+    final servicoIds = carrinho.map((s) => s.id).toList();
+    bool encontrouDiaComVaga = false;
+
+    for (var i = 0; i < 7; i++) {
+      final dia = hoje.add(Duration(days: i));
+      final dataIso = Formatters.dataIso(dia);
+      try {
+        final lista = await _service.consultarDisponibilidade(
+          servicoIds: servicoIds,
+          data: dataIso,
+        );
+        contagemPorDia[dataIso] = lista.length;
+        if (lista.isNotEmpty && !encontrouDiaComVaga) {
+          dataSelecionada = dia;
+          horarios = lista;
+          encontrouDiaComVaga = true;
+        }
+      } catch (e) {
+        contagemPorDia[dataIso] = 0;
+        erro ??= _mensagemDeErro(e);
+      }
+    }
+
+    if (!encontrouDiaComVaga) {
+      // Nenhum dia da semana tem vaga: mantém hoje selecionado e a lista
+      // vazia, para que a tela explique que não há horários no período.
+      dataSelecionada = hoje;
+      horarios = [];
+    }
+
+    carregando = false;
+    notifyListeners();
   }
 
   /// Retorna true em sucesso. Em conflito de concorrência, [erro] é

@@ -12,16 +12,21 @@ class AppConfig {
   AppConfig._();
 
   /// Enquanto true, os Providers usam dados mockados em vez de chamar a API.
-  static const bool useMockData = true;
+  static const bool useMockData = false;
 
-  /// Base URL da API (blueprint /api/* em app/routes/api.py).
+  /// Base URL da API (blueprint /api/* em app/routes/api.py), servida pelo
+  /// SIAS web (C:\projeto-uab, docker compose) em localhost:5200.
   ///
-  /// - Emulador Android: o host da máquina é acessível em 10.0.2.2.
-  /// - iOS Simulator / dispositivo físico na mesma rede: use o IP da
-  ///   máquina rodando o Flask (ex.: http://192.168.0.10:5000).
+  /// - Emulador Android: o host da máquina é acessível em 10.0.2.2, então
+  ///   use 'http://10.0.2.2:5200/api' (valor padrão abaixo).
+  /// - iOS Simulator: o host da máquina é acessível em localhost mesmo,
+  ///   use 'http://localhost:5200/api'.
+  /// - Dispositivo físico na mesma rede Wi-Fi: use o IP da máquina rodando
+  ///   o Flask (ex.: 'http://192.168.0.10:5200/api').
   /// - Nunca use HTTP puro em produção (ver §6 da especificação —
-  ///   Certificate Pinning / HTTPS Strict).
-  static const String apiBaseUrl = 'http://10.0.2.2:5000/api';
+  ///   Certificate Pinning / HTTPS Strict). Em desenvolvimento local,
+  ///   HTTP simples é aceitável.
+  static const String apiBaseUrl = 'http://10.0.2.2:5200/api';
 
   static const Duration pollingInterval = Duration(seconds: 10);
   static const Duration httpTimeout = Duration(seconds: 15);
